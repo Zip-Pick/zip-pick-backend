@@ -4,7 +4,7 @@ import urllib.parse
 
 router = APIRouter()
 
-ODSAY_API_KEY = "rAKCQo6wn1+eT3qqZUaCEg"
+ODSAY_API_KEY = "lChuNdKgVADr7B2J+1d01w"
 
 @router.get("/commute-time-odsay")
 async def get_commute_time(
