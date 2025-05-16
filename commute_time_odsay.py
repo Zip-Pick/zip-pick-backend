@@ -3,7 +3,7 @@ import httpx
 
 router = APIRouter()
 
-ODSAY_API_KEY = "6UOzDV6WzbV4oLfEAoVZ3DBRMeAG4nIMj9aDDyP+Lec"
+ODSAY_API_KEY = "rAKCQo6wn1+eT3qqZUaCEg"
 
 @router.get("/commute-time-odsay")
 async def get_commute_time(
