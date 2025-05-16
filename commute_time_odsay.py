@@ -32,15 +32,15 @@ async def get_commute_time(
             print("📦 원시 응답:", response.text)
             return {"duration_minutes": 9999}
 
-        print("📦 파싱된 데이터(result.path):", data.get("result", {}).get("path"))
+        # 전체 응답 JSON 출력
+        print("📦 전체 응답 내용:", data)
 
         paths = data.get("result", {}).get("path", [])
 
         if not paths:
-            print("❌ ODsay 응답: 경로 없음")
+            print("❌ ODsay 응답: 경로 없음 (result.path 없음)")
             return {"duration_minutes": 9999}
 
-        # 안전하게 totalTime 꺼내기
         info = paths[0].get("info", {})
         if not info or "totalTime" not in info:
             print("❌ info.totalTime 없음")
