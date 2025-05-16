@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Query
 import httpx
+import urllib.parse
 
 router = APIRouter()
 
-ODSAY_API_KEY = "rAKCQo6wn1+eT3qqZUaCEg"
+ODSAY_API_KEY = urllib.parse.quote("rAKCQo6wn1+eT3qqZUaCEg", safe="")
 
 @router.get("/commute-time-odsay")
 async def get_commute_time(
