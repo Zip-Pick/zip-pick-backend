@@ -5,7 +5,7 @@ import urllib.parse
 router = APIRouter()
 
 # 새로 발급받은 Web Key (URI 방식) → + 인코딩 포함
-ODSAY_API_KEY = urllib.parse.quote("lChuNdKgVADr7B2J+1d01w", safe="")
+ODSAY_API_KEY = "6UOzDV6WzbV4oLfEAoVZ3DBRMeAG4nIMj9aDDyP+Lec"
 
 @router.get("/commute-time-odsay")
 async def get_commute_time(
