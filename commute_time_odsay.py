@@ -4,7 +4,8 @@ import urllib.parse
 
 router = APIRouter()
 
-ODSAY_API_KEY = "lChuNdKgVADr7B2J+1d01w"
+# 새로 발급받은 Web Key (URI 방식) → + 인코딩 포함
+ODSAY_API_KEY = urllib.parse.quote("lChuNdKgVADr7B2J+1d01w", safe="")
 
 @router.get("/commute-time-odsay")
 async def get_commute_time(
@@ -14,9 +15,9 @@ async def get_commute_time(
     end_lng: float = Query(...),
 ):
     url = (
-        f"https://api.odsay.com/v1/api/searchPubTransPath?"
+        f"https://api.odsay.com/v1/api/searchPubTransPathT?"
         f"SX={start_lng}&SY={start_lat}&EX={end_lng}&EY={end_lat}"
-        f"&apiKey={ODSAY_API_KEY}"
+        f"&apiKey={ODSAY_API_KEY}&OPT=0&SearchType=0&SearchPathType=0"
     )
 
     try:
@@ -33,7 +34,6 @@ async def get_commute_time(
             print("📦 원시 응답:", response.text)
             return {"duration_minutes": 9999}
 
-        # 전체 응답 JSON 출력
         print("📦 전체 응답 내용:", data)
 
         paths = data.get("result", {}).get("path", [])
