@@ -1,57 +1,47 @@
-from fastapi import APIRouter, Query
-import httpx
-import urllib.parse
+from fastapi import APIRouter, Query, Request
+from fastapi.responses import JSONResponse
+import requests
 
 router = APIRouter()
 
-# 새로 발급받은 Web Key (URI 방식) → + 인코딩 포함
-ODSAY_API_KEY = ODSAY_API_KEY = urllib.parse.quote("lChuNdKgVADr7B2J+1d01w", safe="")
+# 🔑 당신이 발급받은 ODsay Server API Key를 아래에 붙여주세요
+API_KEY = "7U+rJfEdoXcGMW7AsUQcEpgPjwUCMsqGtkq2vAyiDBM"
 
+# ✅ 통근 시간 계산 API
 @router.get("/commute-time-odsay")
-async def get_commute_time(
-    start_lat: float = Query(...),
-    start_lng: float = Query(...),
-    end_lat: float = Query(...),
-    end_lng: float = Query(...),
+def get_commute_time_odsay(
+    start_lat: float = Query(..., description="출발지 위도"),
+    start_lng: float = Query(..., description="출발지 경도"),
+    end_lat: float = Query(..., description="도착지 위도"),
+    end_lng: float = Query(..., description="도착지 경도")
 ):
-    url = (
-        f"https://api.odsay.com/v1/api/searchPubTransPathT?"
-        f"SX={start_lng}&SY={start_lat}&EX={end_lng}&EY={end_lat}"
-        f"&apiKey={ODSAY_API_KEY}&OPT=0&SearchType=0&SearchPathType=0"
-    )
+    url = "https://api.odsay.com/v1/api/searchPubTransPathT"
+    params = {
+        "SX": start_lng,
+        "SY": start_lat,
+        "EX": end_lng,
+        "EY": end_lat,
+        "apiKey": API_KEY,
+        "OPT": 0,
+        "SearchType": 0,
+        "SearchPathType": 0
+    }
 
     try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
+        response = requests.get(url, params=params)
+        data = response.json()
+        print("ODsay 응답 내용:", data)
 
-        print("📦 호출 URL:", url)
-        print("📦 응답 코드:", response.status_code)
-
-        try:
-            data = response.json()
-        except Exception as e:
-            print("❌ JSON 파싱 실패:", e)
-            print("📦 원시 응답:", response.text)
-            return {"duration_minutes": 9999}
-
-        print("📦 전체 응답 내용:", data)
-
-        paths = data.get("result", {}).get("path", [])
-
-        if not paths:
-            print("❌ ODsay 응답: 경로 없음 (result.path 없음)")
-            return {"duration_minutes": 9999}
-
-        info = paths[0].get("info", {})
-        if not info or "totalTime" not in info:
-            print("❌ info.totalTime 없음")
-            return {"duration_minutes": 9999}
-
-        duration_min = info["totalTime"]
-        print(f"🚌 통근시간 계산 성공: {duration_min}분")
-
-        return {"duration_minutes": int(duration_min)}
-
+        if "result" in data and "path" in data["result"]:
+            total_time = data["result"]["path"][0]["info"]["totalTime"]
+            return JSONResponse(content={"duration_minutes": total_time})
+        else:
+            return JSONResponse(content={"duration_minutes": 9999})
     except Exception as e:
-        print(f"❌ ODsay 예외 발생: {e}")
-        return {"duration_minutes": 9999}
+        print("예외 발생:", str(e))
+        return JSONResponse(content={"duration_minutes": 9999})
+
+# ✅ 서버 공인 IP 확인용 API (ODsay 등록용)
+@router.get("/my-ip")
+def get_my_ip(request: Request):
+    return {"ip": request.client.host}
