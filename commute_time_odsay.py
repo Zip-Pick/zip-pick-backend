@@ -4,14 +4,14 @@ import requests
 
 router = APIRouter()
 
-API_KEY = "7U+rJfEdoXcGMW7AsUQcEpgPjwUCMsqGtkq2vAyiDBM"
+SERVER_API_KEY = "7U+rJfEdoXcGMW7AsUQcEpgPjwUCMsqGtkq2vAyiDBM"
+WEB_API_KEY = "IChuNdKgVADr7B2J+1d01w"  # ✅ pointSearch는 Web 키로 호출
 
-# ✅ 정류장 검색 함수 추가 (Flask 코드에서 차용)
 def find_station(lat: float, lng: float):
     try:
         url = "https://api.odsay.com/v1/api/pointSearch"
         params = {
-            "apiKey": API_KEY,
+            "apiKey": WEB_API_KEY,
             "x": str(lng),
             "y": str(lat),
             "radius": "1500"
@@ -33,7 +33,7 @@ def get_commute_time_odsay(
     end_lng: float = Query(...)
 ):
     try:
-        # ✅ 정류장 ID로 보정
+        # ✅ 정류장 ID 보정
         start_station = find_station(start_lat, start_lng)
         end_station = find_station(end_lat, end_lng)
 
@@ -46,7 +46,7 @@ def get_commute_time_odsay(
             "SY": start_lat,
             "EX": end_lng,
             "EY": end_lat,
-            "apiKey": API_KEY,
+            "apiKey": SERVER_API_KEY,
             "OPT": 0,
             "SearchType": 0,
             "SearchPathType": 0
