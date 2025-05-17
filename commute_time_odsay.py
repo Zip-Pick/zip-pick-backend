@@ -4,10 +4,9 @@ import requests
 
 router = APIRouter()
 
-# 🔑 당신이 발급받은 ODsay Server API Key를 아래에 붙여주세요
+# 🔑 발급받은 Server 플랫폼 API Key
 API_KEY = "7U+rJfEdoXcGMW7AsUQcEpgPjwUCMsqGtkq2vAyiDBM"
 
-# ✅ 통근 시간 계산 API
 @router.get("/commute-time-odsay")
 def get_commute_time_odsay(
     start_lat: float = Query(..., description="출발지 위도"),
@@ -17,7 +16,7 @@ def get_commute_time_odsay(
 ):
     url = "https://api.odsay.com/v1/api/searchPubTransPathT"
     params = {
-        "SX": start_lng,
+        "SX": start_lng,  # 경도 먼저!
         "SY": start_lat,
         "EX": end_lng,
         "EY": end_lat,
@@ -30,18 +29,20 @@ def get_commute_time_odsay(
     try:
         response = requests.get(url, params=params)
         data = response.json()
-        print("ODsay 응답 내용:", data)
+        print("📦 ODsay 응답:", data)
+
+        # 에러 메시지까지 프론트로 넘겨보자 (디버깅용)
+        if "error" in data:
+            return JSONResponse(content={"duration_minutes": 9999, "error": data["error"]})
 
         if "result" in data and "path" in data["result"]:
             total_time = data["result"]["path"][0]["info"]["totalTime"]
             return JSONResponse(content={"duration_minutes": total_time})
         else:
-            return JSONResponse(content={"duration_minutes": 9999})
+            return JSONResponse(content={"duration_minutes": 9999, "raw": data})
     except Exception as e:
-        print("예외 발생:", str(e))
-        return JSONResponse(content={"duration_minutes": 9999})
+        return JSONResponse(content={"duration_minutes": 9999, "exception": str(e)})
 
-# ✅ 서버 공인 IP 확인용 API (ODsay 등록용)
 @router.get("/my-ip")
 def get_my_ip(request: Request):
     return {"ip": request.client.host}
